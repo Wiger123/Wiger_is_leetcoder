@@ -18,43 +18,42 @@ class Solution(object):
 
         # 初始化字符串总长度
         n = len(s)
-
+        
+        # 长度为 0 和 1 的应该直接返回原字符串, 否则外层循环会出现问题
+        if n < 2:
+            return s
+        
         # 初始化函数
         dp = [[False] * n for i in range(n)]
 
         # 初始化结果
         max_ans = ""
         
-        # 初始化最大长度, 随时记录用于减少初始化结果替换次数
-        max_len = 0
-        
         # 计算顺序应该是: (0,0) -> (1,1) -> (2,2) -> (3,3) -> (n-1,n-1) -> (0,1) -> (1,2) -> (2,3) -> (n-2,n-1) -> ... -> (0,n-2) -> (1,n-1) -> (0,n-1)
         # 如果用图像显示出来, 大致是通过来回的折线访问了半个三角形
         # 外层循环: 结束位置减去起始位置从 0 到 n - 1, 长度等于该数值 + 1
         for l in range(n):
             # 内层循环: 起始横坐标从 0 到 n - l - 1
-            for i in range(n - l - 1):
+            for i in range(n - l):
+                # 截至位置
+                j = i + l
+                
                 # 判断是否满足边界条件 1
                 if l == 0:
-                    dp[i][i + l] = True
-                    # 跳过本次循环
-                    continue
+                    dp[i][j] = True
                     
                 # 判断是否满足边界条件 2
-                if l == 1:
+                elif l == 1:
                     # 判断相邻两个字符是否相同
-                    if s[i] == s[i + l]:
-                        dp[i][i + l] = True
-                    # 跳过本次循环
-                    continue
-
-                # 非边界条件, 转移方程生效
-                dp[i][i + l] = dp[i + 1][i + l - 1] and s[i] == s[i + l - 1]
+                    dp[i][j] = (s[i] == s[j])
                 
-                # 判断当前长度是否替换最大长度
-                if dp[i][i + l] and l > max_len:
-                    max_ans = s[i:i + l + 1]
-                    max_len = l
+                # 非边界条件, 转移方程生效
+                else:
+                    dp[i][j] = (dp[i + 1][j - 1] and s[i] == s[j])
+                
+                # 判断当前起始至截至位置是否为回文串且当前长度是否替换最大长度
+                if dp[i][j] and l + 1 > len(max_ans):
+                    max_ans = s[i:j + 1]
         
         # 返回最终结果
         return max_ans
