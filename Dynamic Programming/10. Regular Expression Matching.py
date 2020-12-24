@@ -32,7 +32,6 @@ class Solution(object):
                      p[j] == abc / ".": P(i, j) = False                            !matches(s[i], p[j])
 
                 2.2. p[j] == "*": P(i, j) = P(i, j - 2)                            !matches(s[i], p[j - 1])                                                   此时 "*" 表示 0 个字符
-
                      p[j] == "*": P(i, j) = P(i - 1, j) or P(i, j - 2)             matches(s[i], p[j - 1])                                                    此时 "*" 表示 >= 1 个字符
 
             3. 边界条件: P(0, 0) = True
@@ -49,46 +48,61 @@ class Solution(object):
         5. dp 两个维度 + 1 便于计算
         '''
 
-        # 字符串长度
-        m, n = len(s), len(p)
-
-        # 判断是否匹配
+        # 判断 s 的第 i 个字符(s[i - 1])与 p 的第 j 个字符(p[j - 1])是否满足匹配条件
         def matches(i, j):
-            # 若判定对象溢出, 直接返回 False, 正常范围为 1 - m, 1 - n
+            '''
+            i: s 的第 i 个字符
+            j: p 的第 j 个字符
+            '''
+            
+            # 当 i = 0 时, 没有单个字符可以匹配
             if i == 0:
                 return False
-
-            # p[j] 为 "."
+            
+            # 当 p[j - 1] 为 "." 时, 可以匹配一切非空字符
             if p[j - 1] == ".":
                 return True
-
-            # p[j] 为字母或 "*"
+            
+            # 其余情况只需判断 s[i - 1] 是否等于 p[j - 1]
             return s[i - 1] == p[j - 1]
-
-        # 初始化函数
+            
+        # 字符串长度
+        m, n = len(s), len(p)
+        
+        # 初始化转移数组
         dp = [[False] * (n + 1) for _ in range(m + 1)]
-
-        # 初始化 P(0, 0)
+        
+        # 边界条件
         dp[0][0] = True
-
-        # 外层循环: 遍历字符串 s
+        
+        # 外层循环: 对 s 字符串的前 0 - m 个字符进行匹配, 0 个字符表示 s 为空字符串
+        # i: s 的第 i 个字符
         for i in range(m + 1):
-            # 内层循环: 遍历字符串 p: j - 1 对应 0 - n
+            # 内层循环: 对 p 字符串的前 1 - n 个字符进行匹配, 当 p 也为空字符串时, dp[0][0] 即可表示, 直接返回 True, 且当 p 长度为 0 时, 显然无法匹配任何非空的字符串 s, 因此无需遍历 j = 0 的情况
+            # j: p 的第 j 个字符
             for j in range(1, n + 1):
-                # p[j - 1] 为 "*"
+                # 判断 p 的第 j 个字符(p[j - 1])是否为 "*"
                 if p[j - 1] == "*":
-                    # "*" 至少匹配 0 个字符
-                    dp[i][j] = dp[i][j] or dp[i][j - 2]
-
-                    # 判定 "*" 是否匹配多个字符
+                    # 此时 "*" 可以表示 k 个字符
+                    # 通过 s[i] 与 p[j - 1] 匹配判断 k 的实际数目
+                    # k = 0: dp[i][j] = dp[i][j - 2] 即去掉 p 的 j - 1 和 j 两位, 对前面的字符进行匹配
+                    # k > 0: dp[i][j] = dp[i - 1][j] 即去掉 s 的 i 位字符, 对前面的字符进行匹配
+                    # 转移方程的传递关系为: dp[i][j - 2] -> dp[i][j] -> dp[i + 1][j] -> dp[i + 2][j] -> ... -> dp[i + k][j]
+                    # 默认为匹配 0 个字符
+                    dp[i][j] = dp[i][j - 2]
+                    # 当满足匹配规则, 即匹配数目 > 0, 修正转移方程
                     if matches(i, j - 1):
+                        # 考虑到上面的赋值 dp[i][j - 2] = True, 然而 dp[i - 1][j] = False, 这里需要用到 or 进行整体判断
                         dp[i][j] = dp[i][j] or dp[i - 1][j]
-
-                # p[j - 1] 为 字母 或 "."
+                        
+                # p[j - 1] 为字母和 "."   
                 else:
-                    # 判定是否匹配
+                    # 若当前字符匹配转移方程为: dp[i][j] = dp[i - 1][j - 1]
                     if matches(i, j):
-                        dp[i][j] = dp[i][j] or dp[i - 1][j - 1]
-
-        # 传回最后结果
+                        dp[i][j] = dp[i - 1][j - 1]
+                    # 其他情况为 False
+                    else:
+                        dp[i][j] = False
+        
+        # 返回最终结果
         return dp[m][n]
