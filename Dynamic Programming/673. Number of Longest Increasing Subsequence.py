@@ -13,6 +13,16 @@ class Solution(object):
         if k < i and nums[k] < nums[i]:
             dp[i] = max(dp[k]) + 1 
             counts[i] = counts[k] / counts[i] += count[k]
+        
+        例如:
+        i     0 1 2 3 4 5
+        nums  1 3 5 0 8 2
+        dp    1 2 3 1 4 2
+        count 1 1 1 1 1 2
+        
+        i = 3: 由于以 nums[3] 无法构成最长字符串, count[3] = 1 不变
+        i = 4: nums[4] 比前面的 i = 0, 1, 2 大, dp[i]: 1 -> 2 -> 3 -> 4, count[i]: 1 -> 1 -> 1 -> 1
+        i = 5: dp[i]: 1 -> 2 -> 2, count[i]: 1 -> 1 -> 2
         ---
         边界条件:
         ---
@@ -35,7 +45,7 @@ class Solution(object):
         # 外层遍历: 整个数组
         for j, num in enumerate(nums):
             # 内层遍历: 从 0 到 j
-            for i in xrange(j):
+            for i in range(j):
                 # 找到最长数组
                 if nums[i] < nums[j]:
                     # 长度大于则替换
