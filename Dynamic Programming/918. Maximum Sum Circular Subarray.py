@@ -6,19 +6,24 @@ class Solution(object):
         """
         '''
         思路:
-        dp[i]: 以 nums[i] 结尾的最大子数组和
-        考虑到循环, 将数组复制一遍, 即 A = A + A
+        dp_max[i]: 以 nums[i] 结尾的最大子数组和
+        dp_min[i]: 以 nums[i] 结尾的最小子数组和
+        由于所有数的和相同, 计算跨越数组边界的子数组最大值, 等同于计算不跨越数组边界子数组的最小值
         ---
         转移方程:
-        dp[i] = max(nums[i], nums[i] + dp[i - 1])
+        dp_max[i] = max(nums[i], nums[i] + dp_max[i - 1])
+        dp_min[i] = min(nums[i], nums[i] + dp_min[i - 1])
         ---
         边界条件:
-        dp[0] = nums[i]
+        dp_max[0] = nums[0]
+        dp_min[0] = nums[0]
         ---
-        时间复杂度: O(n ^ 2) : 遍历一次数组, 每次遍历计算 n 个 dp 值
-        空间复杂度: O(n) : 只需建立一个大小为 n 的空间
+        时间复杂度: O(n) : 遍历一次数组, 即可完成所有计算
+        空间复杂度: O(n) : 只需建立两个个大小为 n 的空间
         ---
-        难点:
+        难点: 
+        1. 等效转换: 计算跨越数组边界的子数组最大值, 等同于计算不跨越数组边界子数组的最小值
+        2. 边界情况: dp_min[n - 1] 的子数组有可能包含了所有数组元素, 这种情况下取其补集是空数组, 因此要避免所有元素同时被选
         '''
         # 数组为空或长度为一直接返回
         if not A:
@@ -29,25 +34,21 @@ class Solution(object):
     
         # 初始化
         n = len(A)
-
-        # 数组扩展
-        A = A + A
-
-        # 最大值
-        ans = -30001
+        dp_max = [0] * n
+        dp_min = [0] * n
+        dp_max[0] = A[0]
+        dp_min[0] = A[0]
+        sum_all = A[0]
 
         # 遍历数组
-        for i in range(n):
-            # 初始化
-            dp = [0] * n
-            dp[0] = A[i]
-            
-            # 对 A[i] 起始的连续 n 个元素进行动态规划计算
-            for j in range(i + 1, i + n):
-                dp[j - i] = max(A[j], A[j] + dp[j - i - 1])
-            
-                # 记录当前最大值
-                ans = max(ans, dp[j - i])
+        for i in range(1, n):
+            # 最大与最小子数组转移方程
+            dp_max[i] = max(A[i], A[i] + dp_max[i - 1])
+            dp_min[i] = min(A[i], A[i] + dp_min[i - 1])
 
+            # 全数组之和
+            sum_all += A[i]
+        
+        # dp_min[n - 1]: 以 A[n - 1] 结尾的最小子序列, 这种时候不需要跨越数字, 因此该位没有意义, 这里无需参与考虑
         # 返回结果
-        return ans
+        return max(max(dp_max), sum_all - min(dp_min[:n-1]))
