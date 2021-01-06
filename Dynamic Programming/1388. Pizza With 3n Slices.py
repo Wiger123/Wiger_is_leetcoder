@@ -9,7 +9,7 @@ class Solution(object):
         此题与 213 打家劫舍II不同:
         打家劫舍II限制为: 1. 不相邻; 2. 首位不能同时取; 3. 数量上限 n // 2;
         该题的限制为: 1. 不相邻; 2. 首位不能同时取; 3. 数量上限 n // 3;
-        加一层块数限制: dp[i][j]: 取 j 块的情况下, 前 i 块中能取得的最大收益
+        加一层块数限制: dp[i][j]: 一共取 j 块的情况下, 在肉饼前 i 块中能取得的最大收益
         这里需要考虑一个数学论证: 任何一种满足上述限制的指定取法都至少有 1 种实现方式
         用数学归纳法可以推出:
         n = 1: 
@@ -40,24 +40,47 @@ class Solution(object):
         3. 加一层 dp
         '''
 
-        # 数组长度
-        n = len(slices)
+        def maxValue(s):
+            # 数组长度
+            n = len(s)
 
-        # 需要取出的肉饼块数
-        size = n // 3
+            # 需要取出的肉饼块数
+            size = n // 3
 
-        # 取 0 或 1 块直接返回结果
-        if size == 0:
-            return 0
+            # 取 0 或 1 块直接返回结果
+            if size == 0:
+                return 0
+            
+            if size == 1:
+                return max(s)
+
+            # 初始化状态转移矩阵: dp[i][j]
+            # i: 0 -- n
+            # j: 0 -- size
+            dp = [[0] * (size + 1) for _ in range(n + 1)]
+
+            # 遍历数组: 不取第一个
+            for i in range(1, n + 1):
+                for j in range(1, size + 1):
+                    # 考虑边界溢出的问题
+                    if i < 2:
+                        # 转移方程
+                        dp[i][j] = max(s[i], dp[i − 1][j])        
+                    else:
+                        # 转移方程
+                        dp[i][j] = max(dp[i − 2][j − 1] + s[i], dp[i − 1][j])
+
+            # 返回结果
+            return dp[n][size]
         
-        if size == 1:
-            return max(slices)
+        # 不取第一块
+        ans1 = maxValue(slices[1:])
 
-        # 初始化状态转移矩阵: dp[i][j]
-        # i: 0 -- n
-        # j: 0 -- size
-        dp = [[0] * (size + 1) for _ in range(n + 1)]
+        # 不取最后一块
+        ans2 = maxValue(slices[:-1])
+                
+        print(ans1)
+        print(ans2)
 
-        # 遍历数组: 不取第一个
-        for i in range(1, n + 1):
-            for j in range(1, size + 1):
+        # 最终结果
+        return max(ans1, ans2)
