@@ -44,8 +44,9 @@ class Solution(object):
             # 数组长度
             n = len(s)
 
+            # 由于传入的数组长度减少了 1, 此处需要补上
             # 需要取出的肉饼块数
-            size = n // 3
+            size = (n + 1) // 3
 
             # 取 0 或 1 块直接返回结果
             if size == 0:
@@ -62,13 +63,21 @@ class Solution(object):
             # 遍历数组: 不取第一个
             for i in range(1, n + 1):
                 for j in range(1, size + 1):
+                    # 对于 j > i // 2 的情况, 即到 i 位置时, 一共取 j 块, 但饼子不够取的情况时, 直接跳过
+                    # 极端情况: 0 1 0 1 0 1 0 1 0 1 0 1 0 1 0 1 0 1 0 0 0 0 0 0 0 0 0 
+                    # 前面都是隔一个取一个, 后面大量不取, j 也不会超过 (i + 1) // 2
+                    if j > (i + 1) // 2:
+                        continue
+
                     # 考虑边界溢出的问题
+                    # 由于 i, j 表示的都是目前选取的块数和需要选取的总块数, 范围必然是 1 -- n 和 1 -- size
+                    # 但对应的字符范围应该是 i - 1: 0 -- n - 1
                     if i < 2:
                         # 转移方程
-                        dp[i][j] = max(s[i], dp[i − 1][j])        
+                        dp[i][j] = max(s[i - 1], dp[i - 1][j])
                     else:
                         # 转移方程
-                        dp[i][j] = max(dp[i − 2][j − 1] + s[i], dp[i − 1][j])
+                        dp[i][j] = max(dp[i - 2][j - 1] + s[i - 1], dp[i - 1][j])
 
             # 返回结果
             return dp[n][size]
@@ -78,9 +87,6 @@ class Solution(object):
 
         # 不取最后一块
         ans2 = maxValue(slices[:-1])
-                
-        print(ans1)
-        print(ans2)
 
         # 最终结果
         return max(ans1, ans2)
