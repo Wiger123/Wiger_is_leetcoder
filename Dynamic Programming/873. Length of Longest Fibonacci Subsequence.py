@@ -55,6 +55,10 @@ class Solution(object):
                 # 不在数组中则作为新的数列起始
                 else:
                     dp[i][j] = 2
+                    
+                    # 更新最大长度
+                    if dp[i][j] > max_len:
+                        max_len = dp[i][j]
 
         # max_len == 1 即不存在斐波拉契数列
         max_len = 0 if max_len == 1 else max_len
