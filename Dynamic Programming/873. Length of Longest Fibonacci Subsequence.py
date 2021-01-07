@@ -21,6 +21,7 @@ class Solution(object):
         ---
         难点:
         1. 采用 hash 表的存储结构
+        2. 判断 arr[j] - arr[i] 是否在数组中, 并且需要结果的数值小于 arr[i]
         '''
         # 数组长度
         n = len(arr)
@@ -38,8 +39,9 @@ class Solution(object):
         for i in range(n - 1):
             # 内层遍历: 倒数第一位 j: i + 1 -- n - 1
             for j in range(i + 1, n):
-                # 判断 arr[j] - arr[i] 是否在数组中              
-                if arr[j] - arr[i] in arr_set:
+                # 判断 arr[j] - arr[i] 是否在数组中
+                # 并且需要结果的数值小于 arr[i]              
+                if arr[j] - arr[i] in arr_set and 2 * arr[i] > arr[j]:
                     # 元素位置
                     k = arr.index(arr[j] - arr[i])
 
@@ -50,5 +52,12 @@ class Solution(object):
                     if dp[i][j] > max_len:
                         max_len = dp[i][j]
                 
+                # 不在数组中则作为新的数列起始
+                else:
+                    dp[i][j] = 2
+
+        # max_len == 1 即不存在斐波拉契数列
+        max_len = 0 if max_len == 1 else max_len
+
         # 返回最大值
         return max_len
