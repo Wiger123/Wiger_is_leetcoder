@@ -11,7 +11,7 @@ class Solution(object):
         转移方程: 
         1. arr[j] - arr[i] 不在数组中, 即 i 为第一项, j 为第二项
             dp[i][j] = 2
-        2. arr[j] - arr[i] 在数组中, 位置为 k
+        2. arr[j] - arr[i] 在数组中, 并且需要结果的数值小于 arr[i], 位置为 k
             dp[i][j] = dp[k][i] + 1
         ---
         边界条件:
